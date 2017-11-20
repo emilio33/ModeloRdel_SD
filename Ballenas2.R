@@ -34,13 +34,13 @@ TasaCrec <- numeric (Y)
 for (y in 1:Y){  
 
 dB_m <- function(B,r,K,e){    ##función para evaluar pérdida de población. Arroja el delta
-  se <- sample(e, 1, replace = TRUE)
-  sr <- sample(r, 1, replace = TRUE)
-  logis <- sr*B*(1-B/K)  ##crecimiento de la población
+  se <- sample(e, 1, replace = TRUE)  ##agarra un valor de embarcaciones
+  sr <- sample(r, 1, replace = TRUE)  ##agarra un valor de tasa de crecimiento
+  logis <- sr*B*(1-B/K)                ##crecimiento logístico de la población
   habdis<- (11000-((3.1415*(R*R)/10000)*se*ef))  ##hábitat que queda disponible
   cosecha <- (11000 - habdis)*(B/habdis)  ## lo que queda de hábitat multiplicado por la densidad de ballenas (hectareas x ballenas/hectareas= ballenas)
   
-  dB <- logis-cosecha ##deltapoblación
+  dB <- logis-cosecha ##delta población de ballenas
   return(list(dB=dB, se=se, sr=sr))
 }   
 
