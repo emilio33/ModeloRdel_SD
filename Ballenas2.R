@@ -14,39 +14,45 @@ K <- 30000 ##capaciadad de carga
 
 ## distribución uniforme para la tasa de crecimiento de ballena gris
 r <- runif(1000,0.025,0.032)
+hist (r)  ##historgrama de la función de probabilidad de la tasa de crecimiento
 
 p_0 <- Poblacion
-radi <- as.numeric (150) ##radio
+R <- as.numeric (150) ##radio
+HABi <- as.numeric (11000)  #habitat inicial en hectáreas
+Conv_ha <- as.numeric (10000)  ## xa convertir metros en hectáreas
+ef <-as.numeric (0.01) ## efecto del disturbio
+
 e <- rtriangle(1000,22,100)  ## distribución triangular para el número de embarcaciones
-efect <-as.numeric (0.01) ## efecto del disturbio
-ef<- efect
-R <- radi
+hist (e)  ##historgrama de la función de probabilidad de las embarcaciones
+
 B <- p_0
 B_c <- 0
+
 ##Inicializar objetos para guardar los resultados de las simulaciones
+
 PoblacionBall <- numeric(Y)
 Embarcaciones <- numeric(Y)
 Delta <- numeric(Y)
 TasaCrec <- numeric (Y)
+Logis <- numeric(Y)
+Habdis <- numeric(Y)
+Cosecha <- numeric (Y)
 
-
-
-for (y in 1:Y){  
+for (y in 1:Y){  ##creamos un for loop, es decir iteramos el modelo
 
 dB_m <- function(B,r,K,e){    ##función para evaluar pérdida de población. Arroja el delta
   se <- sample(e, 1, replace = TRUE)  ##agarra un valor de embarcaciones
   sr <- sample(r, 1, replace = TRUE)  ##agarra un valor de tasa de crecimiento
   logis <- sr*B*(1-B/K)                ##crecimiento logístico de la población
-  habdis<- (11000-((3.1415*(R*R)/10000)*se*ef))  ##hábitat que queda disponible
-  cosecha <- (11000 - habdis)*(B/habdis)  ## lo que queda de hábitat multiplicado por la densidad de ballenas (hectareas x ballenas/hectareas= ballenas)
+  habdis<- (HABi - ((pi*(R*R)/Conv_ha)*se*ef))  ##hábitat que queda disponible
+  cosecha <- (HABi - habdis)*(B/habdis)  ## lo que queda de hábitat multiplicado por la densidad de ballenas (hectareas x ballenas/hectareas= ballenas)
   
   dB <- logis-cosecha ##delta población de ballenas
-  return(list(dB=dB, se=se, sr=sr))
+  return(list(dB=dB, se=se, sr=sr, logis=logis, habdis=habdis, cosecha=cosecha))
 }   
 
 
 tmp <- dB_m(B,r,K,e) ###delta de población, resultado de la ecuación logistica con distintas poblaciones iniciales
-
 delta <- tmp$dB
 B_c <- B + delta  ##población al tiempo t+1
 B <- B_c ##actualizar el valor de B
@@ -54,11 +60,14 @@ Delta[y] <- delta
 PoblacionBall[y] <- B
 Embarcaciones [y] <- tmp$se
 TasaCrec [y] <- tmp$sr
+Logis <-tmp$logis
+Habdis <-tmp$habdis
+Cosecha<- tmp$cosecha
 }
 
-res<-list(Delta=Delta, PoblacionBall=PoblacionBall, Embarcaciones=Embarcaciones, TasaCrec=TasaCrec)
+res<-list(Delta=Delta, PoblacionBall=PoblacionBall, Embarcaciones=Embarcaciones, TasaCrec=TasaCrec, Logis=Logis, Habdis=Habdis, Cosecha=Cosecha)
 
-return(res)
+return(res)  ##al final nos devuelve los resultados
 }
 
 
