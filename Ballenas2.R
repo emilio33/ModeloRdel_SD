@@ -4,18 +4,17 @@ library (triangle)
 ###Definir parámetros
 
 
-dB_m <- function(B,r,K,e,HD){    ##función para evaluar pérdida de población. Arroja el delta
+dB_m <- function(B,tc,K,e,HD){    ##función para evaluar pérdida de población. Arroja el delta
   R <- 150         ##radio
   Conv_ha <- 10000 ## xa convertir metros en hectáreas
   ef <-0.01        ## efecto de disturbio
   se <- sample(e, 1, replace = TRUE)  ##agarra un valor de embarcaciones
-  sr <- sample(r, 1, replace = TRUE)  ##agarra un valor de tasa de crecimiento
-  
-  logis <- sr*B*(1- B/K)                   ##crecimiento logístico de la población
+ 
+  logis <- tc*B*(1- B/K)                   ##crecimiento logístico de la población
   hd <- (HD - ((pi*(R*R)/Conv_ha)*se*ef))  ##hábitat que queda disponible
   cosecha <- (HD - hd)*(B/hd)              ## lo que se pierde de habitat en relacion a las ballenas (hectareas x ballenas/hectareas= ballenas)
   dB <- logis-cosecha                      ##delta población de ballenas
-  return(list(dB=dB, se=se, sr=sr, logis=logis, hd=hd, cosecha=cosecha))
+  return(list(dB=dB, se=se, tc=tc, logis=logis, hd=hd, cosecha=cosecha))
 }  
 
 
@@ -30,6 +29,9 @@ K <- 3000 ##capaciadad de carga
 ## distribución uniforme para la tasa de crecimiento de ballena gris
 r <- runif(1000,0.025,0.032)
 hist (r)  ##historgrama de la función de probabilidad de la tasa de crecimiento
+sr <- sample(r, 1, replace = TRUE)  ##agarra un valor de tasa de crecimiento
+sr
+tc <- sr
 
 p_0 <- Poblacion
 R <- 150 ##radio
@@ -51,9 +53,10 @@ Logis <- numeric(Y)
 Habitat <- numeric(Y)
 Cosecha <- numeric (Y)
 
+
 for (y in 1:Y){  ##creamos un for loop, es decir iteramos el modelo
  
-tmp <- dB_m(B,r,K,e,HD) ###delta de población, resultado de la ecuación logistica con distintas poblaciones iniciales
+tmp <- dB_m(B,tc,K,e,HD) ###delta de población, resultado de la ecuación logistica con distintas poblaciones iniciales
 delta <- tmp$dB
 B_c <- B + delta  ##población al tiempo t+1
 B <- B_c ##actualizar el valor de B
@@ -63,7 +66,7 @@ HD <- tmp$hd ##actualizar el valor de HD
 Delta[y] <- delta
 PoblacionBall[y] <- B
 Embarcaciones [y] <- tmp$se
-TasaCrec [y] <- tmp$sr
+TasaCrec [y] <- tmp$tc
 Habitat[y] <- HD
 Logis[y] <-tmp$logis
 Cosecha[y] <- tmp$cosecha
